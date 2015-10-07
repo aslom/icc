@@ -54,6 +54,7 @@ RUN useradd -d "/home/icsng" -u 1000 -m -s /bin/bash icsng
 ADD icc.sh /
 #ADD create-data-env.sh /
 ADD env-skel.sh /
+ADD version.sh /
 
 
 USER icsng
