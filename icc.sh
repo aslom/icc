@@ -1,13 +1,21 @@
 #!/bin/bash
 #debug
-#set -x
+set -x
 
 ICC_ENV_ARG=${ICC_ENV:-default}
 source ${ICC_ENV_DIR}${ICC_ENV_ARG}_env.sh
 
-[ -n "$IC_DOCKER_HOST" ] && IC_DOCKER_HOST_ARG="-e DOCKER_HOST=$IC_DOCKER_HOST"
-[ -n "$IC_DOCKER_CERT_PATH" ] && IC_DOCKER_CERT_PATH_ARG="-e DOCKER_CERT_PATH=$IC_DOCKER_CERT_PATH"
-[ -n "$IC_DOCKER_TLS_VERIFY" ] && IC_DOCKER_TLS_VERIFY_ARG="-e DOCKER_TLS_VERIFY=$IC_DOCKER_TLS_VERIFY"
+if [ "$LOCAL" == "true" ]; then
+  [ -n "$DOCKER_HOST" ] && IC_DOCKER_HOST_ARG="-e DOCKER_HOST=$DOCKER_HOST"
+  [ -n "$DOCKER_CERT_PATH" ] && IC_DOCKER_CERT_PATH_ARG="-e DOCKER_CERT_PATH=$DOCKER_CERT_PATH"
+  [ -n "$DOCKER_TLS_VERIFY" ] && IC_DOCKER_TLS_VERIFY_ARG="-e DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY"
+  LOCAL_DOCKER_DIR_MOUNT="-v $HOME/.docker:$HOME/.docker"
+else
+  [ -n "$IC_DOCKER_HOST" ] && IC_DOCKER_HOST_ARG="-e DOCKER_HOST=$IC_DOCKER_HOST"
+  [ -n "$IC_DOCKER_CERT_PATH" ] && IC_DOCKER_CERT_PATH_ARG="-e DOCKER_CERT_PATH=$IC_DOCKER_CERT_PATH"
+  [ -n "$IC_DOCKER_TLS_VERIFY" ] && IC_DOCKER_TLS_VERIFY_ARG="-e DOCKER_TLS_VERIFY=$IC_DOCKER_TLS_VERIFY"
+  LOCAL_DOCKER_DIR_MOUNT=""
+fi
 
 ENV_ARGS="$IC_DOCKER_HOST_ARG $IC_DOCKER_CERT_PATH_ARG $IC_DOCKER_TLS_VERIFY_ARG"
 
@@ -76,6 +84,6 @@ fi
 
 #CMD="docker run -it --rm -v $HOME:/root -v $PWD:/opt/workdir icsng/client $@"
 #docker run -it --env-file env_${CLIENT_ENV_ARG}.sh --volumes-from icsng_env_${CLIENT_ENV_ARG} -v $PWD:/opt/workdir --rm icsng/client $*
-docker run -it --volumes-from icsng_env_${ICC_ENV_ARG} -v $PWD:/opt/workdir $ENV_ARGS --rm icsng/client $PRE_ARGS $* $ARGS
+docker run -it --volumes-from icsng_env_${ICC_ENV_ARG} -v $PWD:/opt/workdir $LOCAL_DOCKER_DIR_MOUNT $ENV_ARGS --rm icsng/client $PRE_ARGS $* $ARGS
 #echo CMD=$CMD
 #$CMD
