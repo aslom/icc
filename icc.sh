@@ -2,6 +2,7 @@
 #debug
 set -x
 
+ICC_VERSION_ARG=${ICC_VERSION:-v0.0.3}
 ICC_ENV_ARG=${ICC_ENV:-default}
 source ${ICC_ENV_DIR}${ICC_ENV_ARG}_env.sh
 
@@ -84,6 +85,6 @@ fi
 
 #CMD="docker run -it --rm -v $HOME:/root -v $PWD:/opt/workdir icsng/client $@"
 #docker run -it --env-file env_${CLIENT_ENV_ARG}.sh --volumes-from icsng_env_${CLIENT_ENV_ARG} -v $PWD:/opt/workdir --rm icsng/client $*
-docker run -it --volumes-from icsng_env_${ICC_ENV_ARG} -v $PWD:/opt/workdir $LOCAL_DOCKER_DIR_MOUNT $ENV_ARGS --rm icsng/client $PRE_ARGS $* $ARGS
+docker run -it --volumes-from icsng_env_${ICC_ENV_ARG} -v $PWD:/opt/workdir $LOCAL_DOCKER_DIR_MOUNT $ENV_ARGS --rm aslom/icc:${ICC_VERSION_ARG} $PRE_ARGS $* $ARGS
 #echo CMD=$CMD
 #$CMD

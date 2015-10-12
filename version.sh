@@ -1,4 +1,4 @@
 #!/bin/bash
 #
-VER=0.0.3
+VER=0.0.4
 echo v$VER
