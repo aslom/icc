@@ -2,9 +2,17 @@
 #debug
 #set -x
 
+
 ICC_VERSION_ARG=${ICC_VERSION:-v0.0.5}
 
 ICC_ENV_ARG=${ICC_ENV:-default}
+
+if [ "$1" = "help" ]; then
+  echo "Commands: create-data-env delete-data-env"
+  echo "Note: parameters from ${ICC_ENV_DIR}${ICC_ENV_ARG}_env.sh only added to commands: cf login, cf ic loging and ice login"
+  exit 0
+fi
+
 source ${ICC_ENV_DIR}${ICC_ENV_ARG}_env.sh
 
 if [ "$LOCAL" == "true" ]; then
@@ -17,6 +25,9 @@ if [ "$LOCAL" == "true" ]; then
     #CERTS_DIR=$(dirname "${DOCKER_CERT_PATH}")
     #LOCAL_DOCKER_DIR_MOUNT="-v ${CERTS_DIR}:${CERTS_DIR}"
     LOCAL_DOCKER_DIR_MOUNT="-v ${DOCKER_CERT_PATH}:${DOCKER_CERT_PATH}:ro"
+  fi
+  if [ -e /var/run/docker.sock ] ; then
+    LOCAL_DOCKER_DIR_MOUNT="-v /var/run/docker.sock:/var/run/docker.sock"
   fi
   #LOCAL_DOCKER_DIR_MOUNT="-v $HOME/.docker:$HOME/.docker"
   #LOCAL_DOCKER_DIR_MOUNT="-v $HOME/.docker/machine:$HOME/.docker/machine"
@@ -34,12 +45,8 @@ if [ "$1" = "check" ]; then
   exit 0
 fi
 
-if [ "$1" = "help" ]; then
-  echo "Commands: create-data-env delete-data-env"
-  echo "For cf login, cf ic loging and cf ice login will automatically add parameters from ${ICC_ENV_DIR}${ICC_ENV_ARG}_env.sh"
-  exit 0
-elif [ "$1" = "create-data-env" ]; then
-  docker create -v /home/icsng --name icc_env_${ICC_ENV_ARG} icsng/client /bin/bash
+if [ "$1" = "create-data-env" ]; then
+  docker create -v /home/icsng --name icc_env_${ICC_ENV_ARG} aslom/icc:${ICC_VERSION_ARG} /bin/bash
   exit 0
 elif [ "$1" = "delete-data-env" ] ; then
   docker rm -f icc_env_${ICC_ENV_ARG}
@@ -80,7 +87,7 @@ if [ "$1" = "cf" ]; then
   elif [ "$2" = "ic" ]; then
     if [ "$3" = "login" ]; then
       #[ -n "$CF_API_HOST" ] && CF_API_ARG="-a https://$CF_API_HOST"
-      #[ -n "$IC_HOST" ] && IC_HOST_ARG="-H $IC_HOST"
+      [ -n "$IC_HOST" ] && IC_HOST_ARG="--host $IC_HOST"
       #[ -n "$IC_REGISTRY" ] && IC_REGISTRY_ARG="-R $IC_REGISTRY"
       ARGS="$CF_API_ARG $IC_HOST_ARG $IC_REGISTRY_ARG"
       echo running $* $ARGS
@@ -102,7 +109,7 @@ elif [ "$1" = "ice" ]; then
     [ -n "$IBM_ID_PASS" ] && IBM_ID_PASS_ARG="-p $IBM_ID_PASS"
     [ -n "$BLUEMIX_ORG" ] && BLUEMIX_ORG_ARG="-o $BLUEMIX_ORG"
     [ -n "$BLUEMIX_SPACE" ] && BLUEMIX_SPACE_ARG="-s $BLUEMIX_SPACE"
-    [ -n "$IC_HOST" ] && ICE_HOST_ARG="-H $IC_HOST"
+    [ -n "$IC_HOST" ] && IC_HOST_ARG="-H $IC_HOST"
     [ -n "$IC_REGISTRY" ] && IC_REGISTRY_ARG="-R $IC_REGISTRY"
     ARGS="$CF_API_ARG $BLUEMIX_ORG_ARG $BLUEMIX_SPACE_ARG $IC_HOST_ARG $IC_REGISTRY_ARG $IBM_ID_USER_ARG $IBM_ID_PASS_ARG"
     ARGS_CLEAN="${ARGS//$IBM_ID_PASS/SECRET}"

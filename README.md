@@ -18,7 +18,7 @@ docker run aslom/icc cat /icc.sh > icc.sh
 ### Create script to use specific version of client
 
 ```
-docker run aslom/icc:VVERSION cat /icc.sh > icc.sh
+docker run aslom/icc:VERSION cat /icc.sh > icc.sh
 ```
 
 ### Setup your environment variables
